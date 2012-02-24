@@ -1,0 +1,11 @@
+This is my first program in javascript. I don't actually know any
+javascript yet, and I already see a lot of bad style here which needs to
+be fixed (I think I've defined everything as global variables?).
+I just wanted to have a demo project to work on as I read through
+_Javascript: The Good Parts_. So, hopefully, this will improve with time.
+
+That said, this first commited version DOES produce the correct output.
+(At least for rotors I,II,III and reflector B.) At the time of this
+writing, it's been about 5 minutes since I got my output to match that of a
+couple of other simulators found online, so I haven't tested other rotor
+configurations yet. That'll come later, along with a user interface.
