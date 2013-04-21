@@ -22,23 +22,14 @@ var notches = [ [16],
                 [4],
                 [0]  ]; //third notch not used
 
-// converts "EKMF..." into [4, 10, 12, 5, ...]
-var charStringToIntArray = function ( charString ) {
-    var intArray = [];
-    for (var i=0; i<charString.length; i++) {
-        intArray.push( 
-            charString.charCodeAt(i) - "A".charCodeAt() );
-    }
-    return intArray;
+// converts "A" into 0, "B" into 1, etc.
+var charToInt = function ( character ) {
+    return character.charCodeAt() - "A".charCodeAt();
 };
 
-// converts [4, 10, 12, 5] into "EKMF"
-var intArrayToCharString = function ( intArray ) {
-    var chars = [];
-    for (var i=0; i<intArray.length; i++) {
-        chars.push( intToChar( intArray[i] ) );
-    }
-    return chars.join("");
+// converts "EKMF..." into [4, 10, 12, 5, ...]
+var charStringToIntArray = function ( charString ) {
+    return charString.split('').map( charToInt );
 };
 
 // converts 4 into E
@@ -47,7 +38,12 @@ var intToChar = function ( intIn ) {
                 intIn + "A".charCodeAt() );
 };
 
-// converts [3,2,4,1] to [4,2,1,3]
+// converts [4, 10, 12, 5] into "EKMF"
+var intArrayToCharString = function ( intArray ) {
+    return intArray.map( intToChar ).join('');
+};
+
+// converts [2,1,3,0] to [3,1,0,2]
 var makeInverseRotor = function ( rotor ) {
     var irotor = []
     for (var i=0; i<rotor.length; i++) {
