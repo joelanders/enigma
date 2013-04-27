@@ -96,9 +96,16 @@ class Rotor < Substitutor
               'NZJHGRCXMYSWBOUFAIVLPEKQDT',
               'FKQHTLXOCBJSPDZRAMEWNIUYGV' ]
 
+  # for now, pretend there is only this one combination of notches.
+  Notches = [ [16], [4], [0] ] #third notch not used
+
   # number is indexed starting from 1 (convention)
   def self.fromPreset(number)
-    Substitutor.fromString( Presets[number - 1] )
+    self.fromString( Presets[number - 1] )
+  end
+
+  def notches
+    Notches
   end
 end
 
@@ -115,7 +122,7 @@ class Reflector < Substitutor
   # reflectors referred to as A, B, C, but let's call
   # them 1, 2, 3 for now
   def self.fromPreset(number)
-    Substitutor.fromString( Presets[number - 1] )
+    self.fromString( Presets[number - 1] )
   end
 end
 
