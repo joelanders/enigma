@@ -1,3 +1,8 @@
+Alphabet = 'abcdefghijklmnopqrstuvwxyz'
+AlphabetInts = 0..Alphabet.length
+AlphabetLetterToInt = Hash[ Alphabet.split('').zip(AlphabetInts) ]
+AlphabetIntToLetter = Hash[ AlphabetInts.zip(Alphabet.split('')) ]
+
 class Enigma
   attr_accessor :rotors, :positions, :reflector
   NumOfRotors = 3
@@ -17,41 +22,59 @@ class Enigma
     new_enigma
   end
 
-  def encipher(entrance_pos)
+  def encipher_string!(string)
+    string.downcase.split('').map{|c| AlphabetLetterToInt[c]}.
+                              map{|c| encipher!(c)}.
+                              map{|c| AlphabetIntToLetter[c]}.join
+  end
+
+  def encipher!(entrance_pos)
+    step! #the rotors step before enchiphering
+    encipher_without_step(entrance_pos)
+  end
+
+  def encipher_without_step(entrance_pos)
     t = (entrance_pos + positions[0])%26   # R position on first rotor
-    puts t
     t = rotors[0].rtol[ t ]                # L position on first rotor
     t = (t - positions[0])%26   #enigma-relative position after first rotor
 
     t = (t + positions[1])%26              # R position on second rotor
-    puts t
     t = rotors[1].rtol[ t ]                # L position on second rotor
     t = (t - positions[1])%26   #enigma-relative position after second rotor
 
     t = (t + positions[2])%26              # R position on third rotor
-    puts t
     t = rotors[2].rtol[ t ]                # L position on third rotor
     t = (t - positions[2])%26   #enigma-relative position after third rotor
 
-    puts t
     t = reflector.rtol[ t ]     #enigma-relative position after reflector
 
-    t = (t - positions[2])%26              # L position on third rotor
-    puts t
+    t = (t + positions[2])%26              # L position on third rotor
     t = rotors[2].ltor[ t ]                # R position on third rotor
-    t = (t + positions[2])%26   #enigma-relative position after third rotor (rightward)
+    t = (t - positions[2])%26   #enigma-relative position after third rotor (rightward)
 
-    t = (t - positions[1])%26              # L position on second rotor
-    puts t
+    t = (t + positions[1])%26              # L position on second rotor
     t = rotors[1].ltor[ t ]                # R position on second rotor
-    t = (t + positions[1])%26   #enigma-relative position after second rotor (rightward)
+    t = (t - positions[1])%26   #enigma-relative position after second rotor (rightward)
 
-    t = (t - positions[0])%26              # L position on first rotor
-    puts t
+    t = (t + positions[0])%26              # L position on first rotor
     t = rotors[0].ltor[ t ]                # R position on first rotor
-    t = (t + positions[0])%26   #enigma-relative position after first rotor (rightward)
+    t = (t - positions[0])%26   #enigma-relative position after first rotor (rightward)
 
     t
+  end
+
+  # rightmost rotor always steps, middle rotor steps when it or the
+  # rightmost rotor is at a notch, leftmost rotor steps if the middle
+  # rotor is at a notch
+  def step!
+    if rotors[1].notches.include? positions[1]        #if middle rotor at a notch
+      positions[2] = (positions[2] + 1) % 26          #step leftmost rotor
+    end
+    if ((rotors[1].notches.include? positions[1]) ||  #if middle rotor at a notch OR
+       ( rotors[0].notches.include? positions[0]))    #if rightmost rotor at a notch
+      positions[1] = (positions[1] + 1) % 26          #step middle rotor
+    end
+    positions[0] = (positions[0] + 1) % 26            #always step rightmost rotor
   end
 end
 
@@ -60,10 +83,6 @@ end
 #  and vice versa
 class Substitutor
   attr_accessor :rtol, :ltor
-  Alphabet = 'abcdefghijklmnopqrstuvwxyz'
-  AlphabetInts = 0..Alphabet.length
-  AlphabetLetterToInt = Hash[ Alphabet.split('').zip(AlphabetInts) ]
-  AlphabetIntToLetter = Hash[ AlphabetInts.zip(Alphabet.split('')) ]
 
   # eg. input of "CAB" would make a substitutor whose
   # RToL map would be A -> C, B -> A, C -> B, and whose
@@ -83,6 +102,7 @@ class Substitutor
 end
 
 class Rotor < Substitutor
+  attr_accessor :notches
   #doesn't know its stepping position relative to other rotors.
   #knows its notches
   #only knows position -> position mapping 'within' itself
@@ -101,11 +121,9 @@ class Rotor < Substitutor
 
   # number is indexed starting from 1 (convention)
   def self.fromPreset(number)
-    self.fromString( Presets[number - 1] )
-  end
-
-  def notches
-    Notches
+    new_rotor = self.fromString( Presets[number - 1] )
+    new_rotor.notches = Notches[number -1]
+    new_rotor
   end
 end
 

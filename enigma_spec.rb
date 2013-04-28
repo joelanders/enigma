@@ -41,3 +41,47 @@ describe Reflector do
     expect(ref2.rtol[17]).to eq(1)
   end
 end
+
+describe Enigma do
+  it 'steps properly' do
+    e = Enigma.fromMostBasicSettings
+    expect(e.positions).to eq([0,0,0])
+    e.step!                             #R always steps
+    expect(e.positions).to eq([1,0,0])
+    15.times {e.step!}
+    expect(e.positions).to eq([16,0,0])
+    e.step!                             #M steps when R at 16
+    expect(e.positions).to eq([17,1,0])
+    26.times {e.step!}
+    expect(e.positions).to eq([17,2,0])
+    52.times {e.step!}
+    expect(e.positions).to eq([17,4,0])
+    e.step!                             #M and L step when M at 4
+    expect(e.positions).to eq([18,5,1])
+  end
+
+  it 'enciphers a letter correctly' do
+    e = Enigma.fromMostBasicSettings
+    # 'abcdefg' -> 'fuvepum'
+    expect(e.encipher! 0).to eq(5)
+    expect(e.encipher! 1).to eq(20)
+    expect(e.encipher! 2).to eq(21)
+    expect(e.encipher! 3).to eq(4)
+    expect(e.encipher! 4).to eq(15)
+    expect(e.encipher! 5).to eq(20)
+    expect(e.encipher! 6).to eq(12)
+  end
+
+  it 'enciphers a string correctly' do
+    e = Enigma.fromMostBasicSettings
+    # 'thislineissecure' -> 'zpjjtafkabumibsx'
+    expect(e.encipher_string!('thislineissecure')).to eq('zpjjtafkabumibsx')
+  end
+
+  it 'enciphers a long string correctly' do
+    e = Enigma.fromMostBasicSettings
+    30.times {e.encipher_string!('thequickbrownfoxjumpsoverthelazydog')}
+    expect(e.encipher_string!('enigmaenigmaenigma')
+           ).to            eq('jbndqgfwnkuvkdazjj')
+  end
+end
