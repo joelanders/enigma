@@ -30,15 +30,32 @@ class Bombe
 
   def test_until_valid!
     iteration = 0
-    loop do
+    good = []
+    # actual bombe didn't step rotors like the enigma did,
+    # but rather like an odometer would, so this isn't quite
+    # correct.
+    17576.times do
       if test_position(4)
-        return iteration
-        break
-      else
-        iteration += 1
-        step_all!
+        good << iteration
       end
+      iteration += 1
+      step_all!
     end
+   good
   end
+
+  #with stecker
+  #let's call them 'banks' on the diagonal board (the capital letters in the diagram)
+  #each bank knows its 'connected to other bank X via enigma Y' pairings and has
+  #    26 true/false registers representing the possible stecker values.
+  #bank with most conncted enigmas is the 'test bank'
+  #pick a letter on the test bank, and for each connected enigma, encrypt it and set
+  #    the bank/register on the other end to true. if it wasn't already set,
+  #    recursively repeat this propagation.
+  #now, in the test register, if there are:
+  #   26 live registers: this rotor state is not self-consistent
+  #   1 live register: this rotor state may be (not necessarily) correct
+  #   else, the above should be repeated but check one of the registers
+  #       that is now unset (this would have been a manual check)
 
 end
