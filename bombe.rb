@@ -80,11 +80,31 @@ class Bombe
   #registers in the test bank.
 
   class DiagonalBoard
-    attr_accessor :banks
+    attr_accessor :banks, :enigmas
 
-    def set_register_pair(b_num, r_num)
+    def initialize
+      banks = []
+      (0..25).each do |i|
+        banks << Bank.new(self, i)
+      end
+    end
+
+    # plugs look like [[x, y, 5], ...]
+    def add_plugs(plugs)
+      plugs.each {|p| add_plug(*p)}
+    end
+
+    def add_plug(a, b, pos)
+      enigma = Enigma.fromMostBasicSettings
+      enigma.setPos(pos)
+      enigmas << enigma
+
+      banks[a].plug_halves << PlugHalf.new(enigma, b)
+      banks[b].plug_halves << PlugHalf.new(enigma, a)
+    end
+
+    def set_diagonal_register(target_b, target_r) #nasty
       banks[b_num].set_register(r_num)
-      banks[r_num].set_register(b_num)
     end
 
     def test_hypothesis(b_num, r_num)
@@ -94,11 +114,16 @@ class Bombe
   end
 
   class Bank
-    attr_accessor :number, :plug_halves, :registers
+    attr_accessor :number, :plug_halves, :registers, :diagonal_board
+
+    def initialize(in_db, in_number)
+      diagonal_board = in_db
+      number = number
+    end
 
     def set_register(r_num)
       unless registers[r_num]
-        set_register_pair(number, r_num) #TODO: better OO here?
+        set_diagonal_register(r_num, number) #nasty
         plug_halves.each {|ph| ph.encipher_and_set_target_register(r_num)}
       end
     end
@@ -110,6 +135,11 @@ class Bombe
 
   class PlugHalf
     attr_accessor :enigma, :target_bank
+
+    def initialize(in_enigma, in_target_bank)
+      enigma = in_enigma
+      target_bank = in_target_bank
+    end
 
     def encipher_and_set_target_register(letter)
       target_bank.set_register( enigma.encipher_without_step(letter) )
