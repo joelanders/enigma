@@ -4,7 +4,7 @@ AlphabetLetterToInt = Hash[ Alphabet.split('').zip(AlphabetInts) ]
 AlphabetIntToLetter = Hash[ AlphabetInts.zip(Alphabet.split('')) ]
 
 class Enigma
-  attr_accessor :rotors, :positions, :reflector
+  attr_accessor :rotors, :positions, :reflector, :plugboard
   NumOfRotors = 3
   #knows rotors, relative positions, reflector
   #knows how to step rotors
@@ -20,6 +20,12 @@ class Enigma
     new_enigma.positions = positions
     new_enigma.reflector = reflector
     new_enigma
+  end
+
+  def self.basic_with_plugs
+    enigma = self.fromMostBasicSettings
+    enigma.plugboard = Plugboard.ten_plugs
+    enigma
   end
 
   def set_odo_pos!(pos)
@@ -49,7 +55,13 @@ class Enigma
   end
 
   def encipher_without_step(entrance_pos)
-    t = (entrance_pos + positions[0])%26   # R position on first rotor
+    if plugboard
+      t = plugboard.rtol[ entrance_pos ]
+    else
+      t = entrance_pos
+    end
+
+    t = (t + positions[0])%26              # R position on first rotor
     t = rotors[0].rtol[ t ]                # L position on first rotor
     t = (t - positions[0])%26   #enigma-relative position after first rotor
 
@@ -74,6 +86,10 @@ class Enigma
     t = (t + positions[0])%26              # L position on first rotor
     t = rotors[0].ltor[ t ]                # R position on first rotor
     t = (t - positions[0])%26   #enigma-relative position after first rotor (rightward)
+
+    if plugboard
+      t = plugboard.ltor[ t ]
+    end
 
     t
   end
@@ -162,4 +178,9 @@ end
 class Plugboard < Substitutor
   #like a rotor with no notches whose internal wiring
   #  is not fixed, but decided at runtime
+  #additional constraint that ltor and rtol mappings
+  #  are the same.
+  def self.ten_plugs
+    self.fromString( 'ZYXWVFGHIJKLMNOPQRSTUEDCBA' )
+  end
 end

@@ -42,6 +42,16 @@ describe Reflector do
   end
 end
 
+describe Plugboard do
+  it 'inits a preset and creates correct mappers' do
+    pb10 = Plugboard.ten_plugs
+    expect( pb10.rtol[0] ).to eq(25)
+    expect( pb10.rtol[2] ).to eq(23)
+    expect( pb10.ltor[0] ).to eq(25)
+    expect( pb10.ltor[2] ).to eq(23)
+  end
+end
+
 describe Enigma do
   it 'steps properly' do
     e = Enigma.fromMostBasicSettings
@@ -76,6 +86,11 @@ describe Enigma do
     e = Enigma.fromMostBasicSettings
     # 'thislineissecure' -> 'zpjjtafkabumibsx'
     expect(e.encipher_string!('thislineissecure')).to eq('zpjjtafkabumibsx')
+  end
+
+  it 'enciphers a string with plugboard' do
+    e = Enigma.basic_with_plugs
+    expect(e.encipher_string!('thequickbrownfoxjumpsoverthelazydogs')).to eq('apxrrzavpjwtdkftzyuubicmlccjakvvyvho')
   end
 
   it 'enciphers a long string correctly' do
