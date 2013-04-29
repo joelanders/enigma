@@ -12,6 +12,16 @@ class Bombe
     bombe
   end
 
+  # not actually a good example becuase none of the menu letters
+  # are steckered. well, i'm going to bed.
+  def self.sally_seashells
+    bombe = Bombe.new
+    bombe.db = DiagonalBoard.new
+    bombe.db.add_plugs [[0, 18, 1], [0, 18, 5], [18,12,13],
+                        [19,12,18], [18,16,10], [16,11,17], [11,0,3]]
+    bombe
+  end
+
   def to_s
     'a bombe'
   end
@@ -88,9 +98,25 @@ class DiagonalBoard
   end
 
   def test_until_stop(b_num, r_num)
-    unless test_hypothesis(b_num, r_num)
-      enigmas.each {|e| e.step_like_odometer}
+    iteration = 0
+    loop do
+      if test_hypothesis(b_num, r_num)
+        break
+      else
+        iteration += 1
+        enigmas.each {|e| e.step_like_odometer!}
+        clear_all_registers
+      end
     end
+    iteration
+  end
+
+  def clear_all_registers
+    banks.each {|b| b.registers = Array.new(26)}
+  end
+
+  def to_s
+    banks.to_s
   end
 end
 
@@ -112,6 +138,10 @@ class Bank
   def num_of_live_wires
     registers.select {|r| !!r}.count
   end
+
+  def to_s
+    [registers.to_s, plug_halves.to_s]
+  end
 end
 
 class PlugHalf
@@ -125,6 +155,11 @@ class PlugHalf
 
   def encipher_and_set_diagonal_pair(letter)
     enciphered_letter = enigma.encipher_without_step(letter)
+    puts "setting #{target_bank}, #{enciphered_letter}"
     diagonal_board.set_diagonal_pair(target_bank, enciphered_letter)
+  end
+
+  def to_s
+    target_bank
   end
 end
