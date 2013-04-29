@@ -22,6 +22,21 @@ class Enigma
     new_enigma
   end
 
+  def set_odo_pos!(pos)
+    self.positions = [0,0,0]
+    pos.times {step_like_odometer!}
+  end
+
+  def step_like_odometer!
+    positions[0] = (positions[0] + 1) % 26
+    if positions[0] == 0
+      positions[1] = (positions[1] + 1) % 26
+      if positions[1] == 0
+        positions[2] = (positions[2] + 1) % 26
+      end
+    end
+  end
+
   def encipher_string!(string)
     string.downcase.split('').map{|c| AlphabetLetterToInt[c]}.
                               map{|c| encipher!(c)}.

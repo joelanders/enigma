@@ -84,4 +84,36 @@ describe Enigma do
     expect(e.encipher_string!('enigmaenigmaenigma')
            ).to            eq('jbndqgfwnkuvkdazjj')
   end
+
+  it 'can step like an odometer' do
+    e = Enigma.fromMostBasicSettings
+    expect( e.positions ).to eq( [0,0,0] )
+
+    25.times {e.step_like_odometer!}
+    expect( e.positions ).to eq( [25,0,0] )
+
+    1.times {e.step_like_odometer!}
+    expect( e.positions ).to eq( [0,1,0] )
+
+    26.times {e.step_like_odometer!}
+    expect( e.positions ).to eq( [0,2,0] )
+    
+    (26*26).times {e.step_like_odometer!}
+    expect( e.positions ).to eq( [0,2,1] )
+  end
+
+  it 'can set odometer-like position' do
+    e = Enigma.fromMostBasicSettings
+    e.set_odo_pos! 4
+    expect( e.positions ).to eq( [4,0,0] )
+
+    e.set_odo_pos! 36
+    expect( e.positions ).to eq( [10,1,0] )
+
+    e.set_odo_pos! 36
+    expect( e.positions ).to eq( [10,1,0] )
+
+    e.set_odo_pos! 10_000
+    expect( e.positions ).to eq( [16,20,14] )
+  end
 end
